@@ -1,0 +1,930 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: CTICloud OpenAPI
+  description: >-
+    CTICloud OpenAPI Interface Overview. The CTICloud OpenAPI exposes a
+    comprehensive set of interfaces for building and integrating with CTICloud's
+    cloud contact center and AI-powered conversational platform.
+  contact:
+    name: Aaron An
+    email: anjb@ti-net.com.cn
+    url: https://www.cticloud.cn
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://api.cticloud.cn
+    description: Production environment server.
+  - url: https://api-dev.cticloud.cn
+    description: Development environment server.
+security:
+  - SignatureAuth: []
+tags:
+  - name: Agent Configuration
+    description: Call center agent setup and configuration.
+  - name: Authentication
+    description: Authentication and authorization related operations.
+  - name: Employee Management
+    description: Employee lifecycle and information management.
+  - name: System
+    description: System health and status endpoints.
+paths:
+  /v1/health:
+    get:
+      summary: Health check (unauthenticated)
+      description: Simple health check endpoint to verify API service availability.
+      tags:
+        - System
+      responses:
+        '200':
+          description: Health check successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    examples:
+                      - ok
+      security: []
+  /v1/employees:
+    post:
+      summary: Create employee
+      description: Create a new employee in the system.
+      tags:
+        - Employee Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmployeeRequest'
+      responses:
+        '201':
+          description: Employee created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    description: 'Result code: 0=success, -1=failure'
+                    example: 0
+                  description:
+                    type: string
+                    description: Result description
+                    example: Employee created successfully
+                  data:
+                    $ref: '#/components/schemas/Employee'
+          headers:
+            x-request-id:
+              schema:
+                type: string
+                format: uuid
+              description: Request correlation ID
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          description: Employee already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - SignatureAuth: []
+  /v1/employees/{employeeId}:
+    get:
+      summary: Get employee information
+      description: Retrieve employee information by employee ID.
+      tags:
+        - Employee Management
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the employee.
+      responses:
+        '200':
+          description: Employee information retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    description: 'Result code: 0=success, -1=failure'
+                    example: 0
+                  description:
+                    type: string
+                    description: Result description
+                    example: Employee found
+                  data:
+                    $ref: '#/components/schemas/Employee'
+          headers:
+            x-request-id:
+              schema:
+                type: string
+                format: uuid
+              description: Request correlation ID
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: The specified employee was not found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - SignatureAuth: []
+    put:
+      summary: Update employee information
+      description: Update employee information by employee ID.
+      tags:
+        - Employee Management
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the employee.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployeeRequest'
+      responses:
+        '200':
+          description: Employee updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    description: 'Result code: 0=success, -1=failure'
+                    example: 0
+                  description:
+                    type: string
+                    description: Result description
+                    example: Employee updated successfully
+                  data:
+                    $ref: '#/components/schemas/Employee'
+          headers:
+            x-request-id:
+              schema:
+                type: string
+                format: uuid
+              description: Request correlation ID
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: The specified employee was not found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - SignatureAuth: []
+  /v1/employees/{employeeId}/password:
+    put:
+      summary: Update employee password
+      description: Update employee password by employee ID.
+      tags:
+        - Employee Management
+        - Authentication
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the employee.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+      responses:
+        '200':
+          description: Password updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    description: 'Result code: 0=success, -1=failure'
+                    example: 0
+                  description:
+                    type: string
+                    description: Result description
+                    example: Password updated successfully
+          headers:
+            x-request-id:
+              schema:
+                type: string
+                format: uuid
+              description: Request correlation ID
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: The specified employee was not found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - SignatureAuth: []
+  /v1/employees/{employeeId}/agent-binding:
+    post:
+      summary: Create agent binding
+      description: Create agent binding with employee, extension, and agent configuration.
+      tags:
+        - Employee Management
+        - Agent Configuration
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the employee.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentBindingRequest'
+      responses:
+        '201':
+          description: Agent binding created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    description: 'Result code: 0=success, -1=failure'
+                    example: 0
+                  description:
+                    type: string
+                    description: Result description
+                    example: Agent binding created successfully
+                  data:
+                    $ref: '#/components/schemas/AgentBindingResponse'
+                  errorCode:
+                    type: integer
+                    description: Error code (only when result=-1)
+          headers:
+            x-request-id:
+              schema:
+                type: string
+                format: uuid
+              description: Request correlation ID
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          description: The specified employee was not found in the system.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - resource already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Business logic error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    example: -1
+                  description:
+                    type: string
+                    example: Maximum agent limit exceeded
+                  errorCode:
+                    type: integer
+                    enum:
+                      - 10001
+                      - 10002
+                      - 10003
+                      - 10004
+                      - 20000
+                      - 20022
+                    description: |
+                      Error codes:
+                      - 10001: System error
+                      - 10002: Request frequency limit exceeded
+                      - 10003: Permission verification failed
+                      - 10004: Enterprise status error
+                      - 20000: Invalid parameter
+                      - 20022: Maximum agent limit exceeded
+      security:
+        - SignatureAuth: []
+components:
+  securitySchemes:
+    SignatureAuth:
+      type: apiKey
+      description: >
+        Custom HMAC signature scheme in `Authorization` header.
+
+        Example:
+
+        `Signature Credential=CTIK1234567890ABCDEF/20250115/sg/cticloud/v1,
+        SignedHeaders=host;x-date;x-content-sha256, Signature=a1b2c3d4...`
+
+
+        Required headers:
+
+        - `x-date` (RFC 3339 UTC)
+
+        - `x-nonce` (UUID v4)
+
+        - `x-content-sha256` (hex SHA256 of payload)
+      name: Authorization
+      in: header
+  schemas:
+    EmployeeIdentifier:
+      type: object
+      description: Employee identifier fields.
+      properties:
+        employeeId:
+          type: string
+          description: Unique identifier for the employee. (unique within enterprise)
+          minLength: 1
+          maxLength: 50
+      required:
+        - employeeId
+    EmployeePersonalInfo:
+      type: object
+      description: Employee personal information fields.
+      properties:
+        name:
+          type: string
+          description: Employee name
+          minLength: 1
+          maxLength: 100
+        gender:
+          type: integer
+          enum:
+            - 0
+            - 1
+          description: 'Gender: 0=male, 1=female'
+        birthDate:
+          type: string
+          format: date
+          description: Birth date
+        certificateId:
+          type: string
+          description: ID card number
+        mobile:
+          type: string
+          description: Mobile phone
+        otherPhone:
+          type: string
+          description: Other phone number
+        fax:
+          type: string
+          description: Fax number
+        email:
+          type: string
+          format: email
+          description: Email address
+        postalCode:
+          type: string
+          description: Postal code
+        address:
+          type: string
+          description: Address
+    PasswordFields:
+      type: object
+      description: Password-related fields.
+      properties:
+        password:
+          type: string
+          description: Employee password (MD5 hashed, 32 characters)
+          pattern: ^[a-f0-9]{32}$
+      required:
+        - password
+    CreateEmployeeRequest:
+      allOf:
+        - $ref: '#/components/schemas/EmployeeIdentifier'
+        - $ref: '#/components/schemas/EmployeePersonalInfo'
+        - $ref: '#/components/schemas/PasswordFields'
+        - type: object
+          description: Additional fields for employee creation
+          properties:
+            agentNumber:
+              type: string
+              description: Agent number
+            enabled:
+              type: boolean
+              default: true
+              description: Whether the employee is enabled
+      description: Request to create a new employee.
+      required:
+        - name
+    EmployeeWorkInfo:
+      type: object
+      description: Employee work-related fields.
+      properties:
+        agentNumber:
+          type: string
+          description: Agent number
+        enabled:
+          type: boolean
+          description: Whether the employee is enabled
+    SystemFields:
+      type: object
+      description: System-managed fields.
+      properties:
+        hasAgent:
+          type: boolean
+          description: Whether assigned to agent
+        callCenterId:
+          type: integer
+          description: Call center ID
+        departmentId:
+          type: integer
+          description: Department ID
+        createTime:
+          type: string
+          format: date-time
+          description: Creation time
+    Employee:
+      allOf:
+        - $ref: '#/components/schemas/EmployeeIdentifier'
+        - $ref: '#/components/schemas/EmployeePersonalInfo'
+        - $ref: '#/components/schemas/EmployeeWorkInfo'
+        - $ref: '#/components/schemas/SystemFields'
+      description: Complete employee information.
+      required:
+        - name
+        - enabled
+        - hasAgent
+        - callCenterId
+        - departmentId
+    Error:
+      type: object
+      description: Standard error response structure.
+      properties:
+        code:
+          type: string
+          description: Error code identifying the type of error
+        message:
+          type: string
+          description: Human-readable error message
+        requestId:
+          type: string
+          format: uuid
+          description: Unique request identifier for tracing
+      required:
+        - code
+        - message
+        - requestId
+    UpdateEmployeeRequest:
+      allOf:
+        - $ref: '#/components/schemas/EmployeePersonalInfo'
+        - $ref: '#/components/schemas/EmployeeWorkInfo'
+        - type: object
+          description: Additional updateable fields
+          properties:
+            password:
+              type: string
+              description: Employee password (MD5 hashed, 32 characters)
+              pattern: ^[a-f0-9]{32}$
+      description: Request to update employee information.
+    UpdatePasswordRequest:
+      type: object
+      description: Request to update employee password.
+      allOf:
+        - $ref: '#/components/schemas/PasswordFields'
+        - type: object
+          properties:
+            password:
+              description: New password (MD5 hashed, 32 characters)
+    CreateAgentBindingRequest:
+      type: object
+      description: Request to create agent binding with employee and extension.
+      properties:
+        employeeId:
+          type: string
+          description: Unique identifier for the employee.
+        employeeName:
+          type: string
+          description: Employee name
+        employeePassword:
+          type: string
+          description: Employee password (MD5 hashed, 32 characters)
+          pattern: ^[a-f0-9]{32}$
+        extension:
+          type: string
+          description: Extension number (3-11 digits)
+          pattern: ^[0-9]{3,11}$
+        extensionType:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+          description: 'Extension type: 1=IAD, 2=WebRTC, 3=Remote phone'
+        extensionPassword:
+          type: string
+          description: Extension password
+          pattern: ^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]{6,20}$
+        extensionAreaCode:
+          type: string
+          description: Extension area code
+        audioCodecs:
+          type: string
+          description: Allowed audio codecs
+        agentNumber:
+          type: string
+          description: Agent number (3-10 digits)
+          pattern: ^[0-9]{3,10}$
+        agentName:
+          type: string
+          description: Agent name
+        agentAreaCode:
+          type: string
+          description: Agent area code
+        power:
+          type: integer
+          enum:
+            - 0
+            - 1
+          default: 0
+          description: 'Agent permission: 0=normal, 1=supervisor'
+        wrapupTime:
+          type: integer
+          default: 10
+          description: Wrapup time in seconds
+        callPower:
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+          default: 0
+          description: >-
+            Call permission: 0=unlimited, 1=domestic long distance, 2=local,
+            3=internal
+        outboundClidType:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+          default: 1
+          description: 'Outbound CLID type: 1=default, 2=random, 3=area code, 4=dynamic'
+        outboundClid:
+          type: string
+          description: Outbound caller ID
+        randomOutbound:
+          type: boolean
+          default: false
+          description: Random outbound caller ID
+        outboundClidProperties:
+          type: object
+          description: Outbound CLID properties
+          properties:
+            isMatchCapital:
+              type: integer
+              enum:
+                - 0
+                - 1
+              description: 'Match capital numbers: 0=no, 1=yes'
+            areaCodeRule:
+              type: integer
+              enum:
+                - 1
+                - 2
+              description: 'Area code rule: 1=agent area code, 2=customer number area code'
+        skillIds:
+          type: array
+          items:
+            type: string
+          description: Selected skill IDs
+        skillLevels:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 10
+          description: Skill levels (corresponding to skillIds)
+        asrEnabled:
+          type: boolean
+          default: false
+          description: ASR enabled
+        webrtcUrlType:
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+          default: 0
+          description: >-
+            WebRTC URL type: 0=default, 1=public domain, 2=private domain,
+            3=public IP, 4=private IP
+        rememberOutbound:
+          type: boolean
+          default: true
+          description: Remember outbound caller
+      required:
+        - employeeId
+        - employeeName
+        - employeePassword
+        - extension
+        - extensionType
+        - extensionPassword
+        - extensionAreaCode
+        - agentNumber
+        - agentName
+        - agentAreaCode
+        - skillIds
+        - skillLevels
+    Extension:
+      type: object
+      description: Extension information.
+      properties:
+        id:
+          type: string
+          description: Extension ID
+        enterpriseId:
+          type: string
+          description: Enterprise ID
+        extension:
+          type: string
+          description: Extension number
+        password:
+          type: string
+          description: Extension password
+          pattern: ^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]{6,20}$
+        callPower:
+          type: string
+          description: Call permission
+        outboundEnabled:
+          type: boolean
+          description: Outbound calls enabled
+        directEnabled:
+          type: boolean
+          description: Direct calls enabled
+        inboundRecord:
+          type: boolean
+          description: Inbound recording enabled
+        outboundRecord:
+          type: boolean
+          description: Outbound recording enabled
+        areaCode:
+          type: string
+          description: Area code
+        type:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+          description: 'Type: 1=IAD, 2=WebRTC, 3=Remote phone'
+        audioCodecs:
+          type: string
+          description: Allowed audio codecs
+        createTime:
+          type: string
+          format: date-time
+          description: Creation time
+    AgentSkill:
+      type: object
+      description: Agent skill information.
+      properties:
+        id:
+          type: string
+          description: Skill assignment ID
+        enterpriseId:
+          type: string
+          description: Enterprise ID
+        agentId:
+          type: string
+          description: Agent ID
+        agentNumber:
+          type: string
+          description: Agent number
+        skillId:
+          type: string
+          description: Skill ID
+        skillLevel:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Skill level (lower number = higher skill)
+        skillName:
+          type: string
+          description: Skill name
+        createTime:
+          type: string
+          format: date-time
+          description: Creation time
+    Agent:
+      type: object
+      description: Comprehensive agent configuration and status information.
+      properties:
+        id:
+          type: string
+          description: Agent ID
+        enterpriseId:
+          type: string
+          description: Enterprise ID
+        agentNumber:
+          type: string
+          description: Agent number
+        active:
+          type: boolean
+          description: Whether agent is active
+        wrapupTime:
+          type: integer
+          description: Wrapup time in seconds
+        areaCode:
+          type: string
+          description: Area code
+        name:
+          type: string
+          description: Agent name
+        power:
+          type: integer
+          enum:
+            - 0
+            - 1
+          description: 'Agent permission: 0=normal, 1=supervisor'
+        callPower:
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+          description: >-
+            Call permission: 0=unlimited, 1=domestic long distance, 2=local,
+            3=internal
+        agentType:
+          type: integer
+          description: Agent type
+        outboundEnabled:
+          type: boolean
+          description: Outbound calls enabled
+        outboundClid:
+          type: string
+          description: Outbound caller ID
+        outboundClidType:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+          description: 'Outbound CLID type: 1=default, 2=random, 3=area code, 4=dynamic'
+        outboundClidProperties:
+          type: object
+          description: Outbound CLID properties
+        inboundRecord:
+          type: boolean
+          description: Inbound recording enabled
+        outboundRecord:
+          type: boolean
+          description: Outbound recording enabled
+        status:
+          type: integer
+          description: Agent status
+        boundPhone:
+          type: string
+          description: Bound phone number
+        asrEnabled:
+          type: boolean
+          description: ASR enabled
+        webrtcUrlType:
+          type: integer
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+          description: >-
+            WebRTC URL type: 0=default, 1=public domain, 2=private domain,
+            3=public IP, 4=private IP
+        rememberOutbound:
+          type: boolean
+          description: Remember outbound caller
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentSkill'
+          description: Agent skills
+        updateTime:
+          type: string
+          format: date-time
+          description: Update time
+        createTime:
+          type: string
+          format: date-time
+          description: Creation time
+    AgentBindingResponse:
+      type: object
+      description: Response from creating agent binding.
+      properties:
+        extension:
+          $ref: '#/components/schemas/Extension'
+        agent:
+          $ref: '#/components/schemas/Agent'
+        employee:
+          $ref: '#/components/schemas/Employee'
+  responses:
+    ErrorResponse:
+      description: Structured error response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalidSig:
+              summary: Invalid signature
+              value:
+                code: InvalidSignature
+                message: Signature does not match
+                requestId: 9e2aa709-8e7b-4c7c-9b8c-2e6f4bb0f3ac
+x-usage:
+  examples:
+    signedGetCurl: >
+      # Compute SHA256 of empty string for GET payload
+
+      PAYLOAD_HASH=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+      DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+      NONCE=$(uuidgen)
+
+      HOST=api.cticloud.cn
+
+      SIGNED_HEADERS="host;x-date;x-content-sha256;x-nonce"
+
+
+      # Build canonical request and string to sign (done in client code)
+
+      # ... derive kSigning and compute signature ...
+
+
+      AUTH='Signature Credential=CTIK1234567890ABCDEF/20250115/sg/cticloud/v1,
+      SignedHeaders='\
+           "$SIGNED_HEADERS"', Signature=a1b2c3d4...'
+
+      curl -sS 'https://api.cticloud.cn/v1/your-api-endpoint' \
+        -H "Host: $HOST" \
+        -H "x-date: $DATE" \
+        -H "x-nonce: $NONCE" \
+        -H "x-content-sha256: $PAYLOAD_HASH" \
+        -H "Authorization: $AUTH"
+  policies:
+    - Keys must be rotated at least every 90 days.
+    - All production traffic must use TLS 1.2+.
+    - Replay window: 5 minutes; duplicate `(AccessKeyId,x-nonce)` rejected.
+    - Key policies can bind allowed IP ranges, regions, and services.
