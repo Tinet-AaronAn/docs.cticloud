@@ -1,0 +1,473 @@
+openapi: 3.1.0
+info:
+  title: Modern Secure API with Signature, STS, OAuth2, and mTLS
+  version: 1.0.0
+  description: >
+    This OpenAPI describes a production-grade authentication stack inspired by
+
+    Alibaba Cloud and AWS. It supports:
+
+
+    **Primary**
+
+    - HMAC signature authentication with access key / secret key (AK/SK)
+
+    - Temporary credentials via Security Token Service (STS)
+
+
+    **Optional / Complementary**
+
+    - OAuth2.1 (Client Credentials) for 3rd-party integrations
+
+    - Mutual TLS (mTLS) for zero-trust internal traffic
+
+
+    ---
+
+    # Signature Scheme (SigV1/HMAC-SHA256)
+
+
+    Requests are authenticated via an `Authorization` header with this format:
+
+
+    ```text
+
+    Signature Credential=<AKID>/<Date>/<Region>/<Service>/sigv1,
+    SignedHeaders=<lowercase;semicolon-separated>, Signature=<hex>
+
+    ```
+
+
+    Additional required headers:
+
+
+    - `x-date`: RFC 3339 timestamp (e.g., `2025-09-02T03:04:05Z`).
+
+    - `x-nonce`: A UUID v4 unique per request (replay protection; TTL 5
+    minutes).
+
+    - `x-content-sha256`: Hex SHA256 of the HTTP payload (use `e3b0c442...` for
+    empty body).
+
+
+    Canonical request string (\n-joined):
+
+
+    1. HTTPMethod
+
+    2. CanonicalURI (URL-encoded, path-normalized)
+
+    3. CanonicalQueryString (sorted by key, RFC 3986 encoded)
+
+    4. CanonicalHeaders (sorted; `key:trimmed-value` each line; keys lowercase)
+
+    5. SignedHeaders (semicolon-separated list of header keys)
+
+    6. HashedPayload (lowercase hex SHA256)
+
+
+    StringToSign (\n-joined):
+
+
+    1. `HMAC-SHA256` (algorithm id)
+
+    2. `<Date>/<Region>/<Service>/sigv1` (scope)
+
+    3. `SHA256(canonicalRequest)` (hex)
+
+
+    Derive signing key:
+
+
+    ```
+
+    kDate = HMAC("SIGV1" + secret, Date)
+
+    kRegion = HMAC(kDate, Region)
+
+    kService = HMAC(kRegion, Service)
+
+    kSigning = HMAC(kService, "sigv1")
+
+    signature = HMAC_HEX(kSigning, StringToSign)
+
+    ```
+
+
+    The server validates:
+
+    - Key status (active/disabled), scope (region/service), and time window.
+
+    - Replay-protection using `(AKID, x-nonce, x-date)` with a 5-minute skew.
+
+    - That `SignedHeaders` are present and match values used in the signature.
+
+    - Optional: bind client IP / mTLS subject to the key policy.
+
+
+    **Temporary Credentials (STS)**
+
+    - Exchange long-term AK/SK for a short-lived triplet: `AccessKeyId`,
+    `SecretAccessKey`, `SessionToken`.
+
+    - When using STS creds, include header: `x-session-token`.
+
+
+    **Error Codes**
+
+    - `InvalidSignature`, `ExpiredSignature`, `MissingAuthenticationToken`,
+    `AccessDenied`, `SignatureMismatch`, `ReplayAttackDetected`.
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: https://staging-api.example.com
+    description: Staging
+security:
+  - mTLS: []
+  - SignatureAuth: []
+components:
+  securitySchemes:
+    SignatureAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        Custom HMAC signature scheme in `Authorization` header.
+
+        Example:
+
+        `Signature Credential=AKIDEXAMPLE/20250902/ap-northeast-1/iam/sigv1,
+        SignedHeaders=host;x-date;x-content-sha256, Signature=0123abcd...`
+
+
+        Required headers:
+
+        - `x-date` (RFC 3339 UTC)
+
+        - `x-nonce` (UUID v4)
+
+        - `x-content-sha256` (hex SHA256 of payload)
+
+        Optional when using STS temporary credentials:
+
+        - `x-session-token`
+    ApiKeyLite:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: >-
+        Low-privilege key for simple, non-critical public endpoints. No signing;
+        strict rate limits.
+    OAuth2CC:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.example.com/oauth2/token
+          scopes:
+            read: Read-only access
+            write: Read and write access
+    mTLS:
+      type: mutualTLS
+      description: Mutual TLS; the client certificate subject must match key policy.
+  headers:
+    XDate:
+      description: RFC 3339 UTC timestamp used for signature freshness.
+      schema:
+        type: string
+        format: date-time
+    XNonce:
+      description: UUID v4 unique per request.
+      schema:
+        type: string
+        format: uuid
+    XContentSHA256:
+      description: Hex SHA256 of the request body (or of empty string for no body).
+      schema:
+        type: string
+        pattern: ^[A-Fa-f0-9]{64}$
+    XSessionToken:
+      description: Session token returned by STS for temporary credentials.
+      schema:
+        type: string
+  responses:
+    ErrorResponse:
+      description: Structured error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalidSig:
+              summary: Invalid signature
+              value:
+                code: InvalidSignature
+                message: Signature does not match
+                requestId: 9e2aa709-8e7b-4c7c-9b8c-2e6f4bb0f3ac
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+        - requestId
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+          format: uuid
+    STSToken:
+      type: object
+      required:
+        - accessKeyId
+        - secretAccessKey
+        - sessionToken
+        - expiration
+      properties:
+        accessKeyId:
+          type: string
+        secretAccessKey:
+          type: string
+          writeOnly: true
+        sessionToken:
+          type: string
+        expiration:
+          type: string
+          format: date-time
+        policy:
+          type: object
+          additionalProperties: true
+    AssumeRoleRequest:
+      type: object
+      required:
+        - roleArn
+        - sessionName
+        - durationSeconds
+      properties:
+        roleArn:
+          type: string
+          description: Role to assume
+        sessionName:
+          type: string
+        durationSeconds:
+          type: integer
+          minimum: 900
+          maximum: 43200
+        policy:
+          type: object
+          description: Optional inline policy to restrict the session
+          additionalProperties: true
+paths:
+  /v1/health:
+    get:
+      summary: Health check (unauthenticated)
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /v1/examples:
+    get:
+      summary: Signed request example
+      description: >
+        Demonstrates a signed GET call requiring `SignatureAuth` (and optionally
+        mTLS if globally enabled).
+
+
+        **Required headers**: `Authorization`, `x-date`, `x-nonce`,
+        `x-content-sha256` (for GET, hash of empty string).
+      security:
+        - SignatureAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Example result
+          headers:
+            x-request-id:
+              description: Request correlation id
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: string
+                  nextToken:
+                    type: string
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Signed POST example
+      security:
+        - SignatureAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/sts/assume-role:
+    post:
+      summary: Issue temporary credentials (STS)
+      description: >
+        Exchange a long-term AK/SK (signed request) for temporary credentials.
+
+        When using the returned credentials, include `x-session-token` in
+        requests.
+      security:
+        - SignatureAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssumeRoleRequest'
+            examples:
+              default:
+                value:
+                  roleArn: arn:example:iam::123456789012:role/ReadOnly
+                  sessionName: demo-session
+                  durationSeconds: 3600
+                  policy:
+                    Version: '2025-09-02'
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                          - examples:List
+                          - examples:Get
+                        Resource:
+                          - '*'
+      responses:
+        '200':
+          description: Temporary credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/STSToken'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+  /v1/oauth2/introspect:
+    post:
+      summary: OAuth2 token introspection (for 3rd-party flows)
+      security:
+        - OAuth2CC:
+            - read
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Introspection result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  active:
+                    type: boolean
+                  scope:
+                    type: string
+                  exp:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+x-usage:
+  examples:
+    signedGetCurl: >
+      # Compute SHA256 of empty string for GET payload
+
+      PAYLOAD_HASH=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+      DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+      NONCE=$(uuidgen)
+
+      HOST=api.example.com
+
+      SIGNED_HEADERS="host;x-date;x-content-sha256;x-nonce"
+
+
+      # Build canonical request and string to sign (done in client code)
+
+      # ... derive kSigning and compute signature ...
+
+
+      AUTH='Signature Credential=AKIDEXAMPLE/20250902/ap-northeast-1/iam/sigv1,
+      SignedHeaders='\
+           "$SIGNED_HEADERS"', Signature=0123abcd...'
+
+      curl -sS 'https://api.example.com/v1/examples?q=foo&limit=10' \
+        -H "Host: $HOST" \
+        -H "x-date: $DATE" \
+        -H "x-nonce: $NONCE" \
+        -H "x-content-sha256: $PAYLOAD_HASH" \
+        -H "Authorization: $AUTH"
+  policies:
+    - >-
+      Keys must be rotated at least every 90 days; STS sessions <= 1 hour by
+      default.
+    - >-
+      All production traffic must use TLS 1.2+; internal services additionally
+      require mTLS.
+    - Replay window: 5 minutes; duplicate `(AKID,x-nonce)` rejected.
+    - >-
+      Key policies can bind allowed IP ranges, mTLS subjects, regions, and
+      services.
