@@ -221,6 +221,10 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/NumberInfo'
+              examples:
+                New Example:
+                  summary: New Example
+                  value: '{}'
   /number/pool/list:
     get:
       tags:
