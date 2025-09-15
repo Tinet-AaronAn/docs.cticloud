@@ -19,9 +19,10 @@ security:
   - signature: []
 components:
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: sign
   schemas:
     BaseRequest:
       type: object
