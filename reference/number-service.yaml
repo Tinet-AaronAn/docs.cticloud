@@ -19,11 +19,9 @@ security:
   - signature: []
 components:
   securitySchemes:
-    signature:
-      type: apiKey
-      in: query
-      name: sign
-      description: MD5签名验证
+    BearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     BaseRequest:
       type: object
@@ -607,3 +605,4 @@ tags:
     description: 号码状态检测相关接口
   - name: 黑名单管理
     description: 号码黑名单管理相关接口
+x-readme: {}
