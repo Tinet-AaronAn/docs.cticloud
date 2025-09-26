@@ -1,0 +1,4 @@
+- setcachedata
+- getcachedata
+- deletecachedata
+- listcachedata
