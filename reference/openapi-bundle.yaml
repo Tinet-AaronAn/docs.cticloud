@@ -1,0 +1,1105 @@
+openapi: 3.0.3
+info:
+  title: CTICloud Platform API
+  version: 12.0.0
+  description: >-
+    CTICloud Call Center Platform API provides comprehensive cloud-based call
+    center solutions with advanced features and enterprise-grade reliability.
+
+    ## Platform Overview
+      CTICloud is a carrier-grade cloud call center platform providing comprehensive inbound/outbound calling, agent management, intelligent dialing, speech recognition, and data analytics capabilities. The platform adopts a distributed architecture with multi-region deployment, delivering stable and reliable communication solutions for tenants.
+
+    ## Core Features - **Agent Management**: Agent login/logout, status control,
+    call operations, skill-based routing - **Diversified Outbound Calling**:
+    Predictive dialing, preview dialing, auto dialing, click-to-call - **Voice
+    AI Services**: ASR speech-to-text, call recording analysis, emotion
+    recognition, speech rate detection - **Comprehensive Data Reports**: Agent
+    workload, queue statistics, trunk analysis, satisfaction surveys -
+    **Complete Call Records**: Recording management, call details, signaling
+    records, satisfaction records - **Flexible Permission System**: Multi-level
+    permission verification, API authentication, security authorization - **Rich
+    Configuration Management**: Enterprise settings, extension management, queue
+    management, voice navigation
+
+    ## Technical Features - Supports GET/POST request methods - Standardized
+    response format - Comprehensive error code system - Multi-region disaster
+    recovery deployment - High-concurrency processing capability.
+  contact:
+    name: CTICloud Technical Support
+    email: api-support@cticloud.cn
+    url: https://docs.cticloud.cn
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://api-{region}.cticloud.cn/{version}
+    description: Production Environment.
+    variables:
+      region:
+        default: cn-1
+        enum:
+          - cn-1
+          - cn-2
+          - cn-3
+          - cn-5
+          - cn-6
+          - sg
+          - jp
+          - us
+        description: Deployment region
+      version:
+        default: 12.0.0
+        enum:
+          - 12.0.0
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Authentication
+    description: >-
+      API authentication, user verification, access control and security
+      functions.
+  - name: Employee Management
+    description: >-
+      Employee information, organizational structure, extension binding and
+      personnel management.
+  - name: Agent Management
+    description: Agent login/logout, status control, skill management and agent operations.
+  - name: Queue Management
+    description: >-
+      Queue configuration, routing rules, skill group management and queue
+      operations.
+  - name: Extension Management
+    description: >-
+      Extension configuration, terminal management, phone settings and extension
+      operations.
+  - name: IVR Management
+    description: >-
+      IVR flow configuration, voice navigation settings and interactive voice
+      response.
+  - name: Phone Number Management
+    description: >-
+      Number pool management, number location queries and phone number
+      operations.
+  - name: Outbound Group Management
+    description: Outbound group configuration, outbound rules and caller ID management.
+  - name: Webhook Management
+    description: Event push configuration, webhook settings and push rule management.
+  - name: Agent Actions
+    description: Real-time agent operations, call handling and agent activity controls.
+  - name: Supervisor Controls
+    description: >-
+      Supervisor monitoring, forced operations, whisper and advanced management
+      functions.
+  - name: Call Management
+    description: Call handling, call routing, call control and telephony operations.
+  - name: Tenant Configuration
+    description: >-
+      Tenant settings, voice files, configuration parameters and tenant-level
+      management.
+  - name: Outbound Call Task
+    description: >-
+      Outbound call task management, number import, agent assignment and
+      outbound monitoring.
+  - name: Data Management
+    description: Call records, reports, statistics, logs and data analytics.
+  - name: Voice AI Agent Management
+    description: >-
+      AI agent conversations, voice recognition, emotion analysis and AI
+      services.
+  - name: Billing Management
+    description: Cost statistics, billing details and finance-related functions.
+paths:
+  /cache/set:
+    post:
+      tags:
+        - IVR Management
+      summary: Set cache data
+      description: Set cache key-value pair data.
+      operationId: setCacheData
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdParam'
+        - $ref: '#/components/parameters/TimestampParam'
+        - $ref: '#/components/parameters/TenantIdParam'
+        - $ref: '#/components/parameters/NonceParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCacheRequest'
+            examples:
+              SetCacheExample:
+                $ref: '#/components/examples/SetCacheExample'
+      responses:
+        '200':
+          $ref: '#/components/responses/SetCacheResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceededResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /cache/get:
+    post:
+      tags:
+        - IVR Management
+      summary: Get cache data
+      description: Get cache data by key.
+      operationId: getCacheData
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdParam'
+        - $ref: '#/components/parameters/TimestampParam'
+        - $ref: '#/components/parameters/TenantIdParam'
+        - $ref: '#/components/parameters/NonceParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetCacheRequest'
+            examples:
+              GetCacheExample:
+                $ref: '#/components/examples/GetCacheExample'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetCacheResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceededResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /cache/delete:
+    post:
+      tags:
+        - IVR Management
+      summary: Delete cache data
+      description: Delete cache data for specified key.
+      operationId: deleteCacheData
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdParam'
+        - $ref: '#/components/parameters/TimestampParam'
+        - $ref: '#/components/parameters/TenantIdParam'
+        - $ref: '#/components/parameters/NonceParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteCacheRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteCacheResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceededResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /cache/list:
+    get:
+      tags:
+        - IVR Management
+      summary: List cache data
+      description: Retrieve a paginated list of cache data objects with optional filtering.
+      operationId: listCacheData
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdParam'
+        - $ref: '#/components/parameters/TimestampParam'
+        - $ref: '#/components/parameters/TenantIdParam'
+        - $ref: '#/components/parameters/NonceParam'
+        - $ref: '#/components/parameters/PageNoParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListCacheResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceededResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+  /tel-group/create:
+    post:
+      tags:
+        - IVR Management
+      summary: Create telephone group
+      description: >-
+        Create a new telephone group with specified configuration parameters
+        including timeout, strategy, and stop status.
+      operationId: createTelGroup
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/RequestIdParam'
+        - $ref: '#/components/parameters/TimestampParam'
+        - $ref: '#/components/parameters/TenantIdParam'
+        - $ref: '#/components/parameters/NonceParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTelGroupRequest'
+            examples:
+              CreateTelGroupExample:
+                $ref: '#/components/examples/CreateTelGroupExample'
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateTelGroupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceededResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableResponse'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-CTI-ApiKey
+      description: >
+        CTICloud API Key authentication for secure access to platform resources.
+
+
+        **How it works:**
+
+        Clients include a pre-shared API key in the request header for
+        authentication.
+
+        The server validates the key against authorized credentials and grants
+        access accordingly.
+
+
+        **Header Format:**
+
+        ```
+
+        X-CTI-ApiKey: {ApiKey}
+
+        ```
+
+
+        **Security Features:**
+
+        - **Strong Key Generation**: API keys use cryptographically secure
+        random generation
+
+        - **Key Rotation**: Regular key rotation policies enforced
+
+        - **Access Scoping**: Keys can be scoped to specific operations and
+        resources
+
+        - **Rate Limiting**: Per-key request rate limiting prevents abuse
+
+        - **Audit Logging**: All API key usage is logged for security monitoring
+
+
+        **Required Security Headers:**
+
+        - `X-CTI-Request-ID`: Unique request identifier for tracking and
+        deduplication
+
+        - `X-CTI-Timestamp`: Request timestamp for replay protection (UTC
+        format)
+
+        - `X-CTI-Tenant-ID`: Tenant context identifier for multi-tenancy
+        validation
+
+        - `X-CTI-Nonce`: Random nonce for additional replay protection
+
+
+        **Key Format:**
+
+        - API Keys: Simple secure random string with prefix (e.g.,
+        CTIK_ABC123XYZ789DEF456GHI)
+
+        - Length: 32-64 characters for sufficient entropy  
+
+        - Character set: Base64URL safe characters (A-Z, a-z, 0-9, -, _)
+
+        - Tenant context provided via X-CTI-Tenant-ID header
+
+
+        **Security Requirements:**
+
+        - All requests must use HTTPS/TLS 1.2+ encryption
+
+        - Keys must be stored securely and never logged or exposed
+
+        - Implement proper key lifecycle management
+
+        - Monitor for suspicious usage patterns
+  schemas:
+    BaseRequest:
+      description: >-
+        Base request schema containing common required fields for all API
+        requests.
+      type: object
+      required:
+        - tenantId
+      properties:
+        tenantId:
+          type: integer
+          description: Tenant ID, required (minimum logical unit identifier)
+    BaseResponse:
+      description: >-
+        Base response schema containing standard response fields for all API
+        responses.
+      type: object
+      properties:
+        result:
+          type: integer
+          enum:
+            - 0
+            - -1
+          description: >
+            Operation result status code:
+
+            - 0: Success - Operation completed successfully
+
+            - -1: Failure - Operation failed, check description field for
+            details
+        description:
+          type: string
+          description: Return result description
+    CacheData:
+      description: Cache data structure containing key-value information and metadata.
+      type: object
+      properties:
+        key:
+          type: string
+          description: Cache key
+        value:
+          type: string
+          description: Cache value
+        expired:
+          type: integer
+          description: Time to live (seconds)
+        createTime:
+          $ref: '#/components/schemas/UTCTimestamp'
+        size:
+          type: integer
+          description: Data size (bytes)
+    CacheListData:
+      description: Paginated list response data for cache keys.
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of cache keys
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Number of items per page
+        keys:
+          type: array
+          description: Array of cache data objects in the current page
+          items:
+            $ref: '#/components/schemas/CacheData'
+    TelGroupData:
+      description: >-
+        Telephone group data structure containing configuration and metadata
+        information.
+      type: object
+      properties:
+        tgno:
+          type: string
+          maxLength: 8
+          pattern: ^[0-9]{1,8}$
+          description: >-
+            Telephone group number (primary business identifier, unique within
+            tenant)
+        groupName:
+          type: string
+          description: Telephone group name
+        timeout:
+          type: integer
+          minimum: 5
+          maximum: 600
+          description: Timeout duration in seconds, range 5-600
+        strategy:
+          type: string
+          enum:
+            - order
+            - random
+          description: Call strategy, 'order' for sequential, 'random' for random
+        enabled:
+          type: integer
+          enum:
+            - 0
+            - 1
+          description: Enable status, 1 for enabled, 0 for disabled
+        modifyTime:
+          $ref: '#/components/schemas/UTCTimestamp'
+        createTime:
+          $ref: '#/components/schemas/UTCTimestamp'
+    ErrorResponse:
+      description: Standard error response format for all API error responses.
+      type: object
+      required:
+        - errorCode
+        - message
+        - timestamp
+        - path
+      properties:
+        errorCode:
+          type: string
+          description: >
+            Machine-readable error code for programmatic handling:
+
+            - AUTHENTICATION_FAILED: Invalid or missing authentication
+
+            - INSUFFICIENT_PERMISSIONS: Access denied
+
+            - INVALID_REQUEST: Request format, parameter errors, or business
+            logic validation failed
+
+            - RESOURCE_NOT_FOUND: Requested resource does not exist
+
+            - RATE_LIMIT_EXCEEDED: Request rate limit exceeded
+
+            - INTERNAL_ERROR: Server internal error
+          example: AUTHENTICATION_FAILED
+        message:
+          type: string
+          description: Human-readable error message
+          example: Invalid API key provided
+        details:
+          type: string
+          description: Additional error details for debugging (optional)
+          example: The API key format is invalid or the key has expired
+        timestamp:
+          $ref: '#/components/schemas/UTCTimestamp'
+        path:
+          type: string
+          description: API path where the error occurred
+          example: /cache/set
+        requestId:
+          type: string
+          description: Unique request identifier for tracking
+          example: 550e8400-e29b-41d4-a716-446655440000
+    UTCTimestamp:
+      type: string
+      pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3})?Z$
+      description: >
+        Universal Coordinated Time (UTC) timestamp in ISO 8601 format.
+
+
+        **Format**: ISO 8601 UTC format with mandatory 'Z' suffix
+
+        - Standard: `YYYY-MM-DDTHH:mm:ssZ` (without milliseconds)  
+
+        - Extended: `YYYY-MM-DDTHH:mm:ss.sssZ` (with milliseconds)
+
+
+        **🌍 GLOBAL REQUIREMENTS:**
+
+        - **MUST** always be in UTC timezone (suffix 'Z' required)
+
+        - **MUST** NOT include timezone offsets (+08:00, -05:00, etc.)
+
+        - **MUST** NOT use local time without conversion
+
+
+        **🕒 CLIENT-SIDE CONVERSION EXAMPLES:**
+
+        ```javascript
+
+        // ✅ Correct - Convert local to UTC
+
+        new Date().toISOString()  // "2024-12-30T04:13:14.123Z"
+
+
+        // ❌ Wrong - Local time format
+
+        new Date().toString()     // "Mon Dec 30 2024 12:13:14 GMT+0800"
+
+        ```
+
+
+        **🌏 TIMEZONE CONVERSION REFERENCE:**
+
+        | Local Time Zone | Local Time | UTC Time | API Timestamp |
+
+        |----------------|------------|----------|---------------|
+
+        | Beijing (UTC+8) | 2024-12-30 12:13:14 | 2024-12-30 04:13:14 |
+        `2024-12-30T04:13:14Z` |
+
+        | New York (UTC-5) | 2024-12-30 07:13:14 | 2024-12-30 12:13:14 |
+        `2024-12-30T12:13:14Z` |
+
+        | London (UTC+0) | 2024-12-30 12:13:14 | 2024-12-30 12:13:14 |
+        `2024-12-30T12:13:14Z` |
+
+        | Tokyo (UTC+9) | 2024-12-30 13:13:14 | 2024-12-30 04:13:14 |
+        `2024-12-30T04:13:14Z` |
+
+        | Sydney (UTC+11) | 2024-12-30 15:13:14 | 2024-12-30 04:13:14 |
+        `2024-12-30T04:13:14Z` |
+
+
+        **⚠️ SPECIAL CONSIDERATIONS:**
+
+        - **Daylight Saving Time**: Client must handle DST transitions
+        automatically
+
+        - **Leap Seconds**: Server will accept standard 60-second minutes
+
+        - **Clock Skew**: Server accepts ±300 seconds tolerance for network
+        delays
+
+        - **Precision**: Milliseconds optional but recommended for
+        high-frequency operations.
+      example: '2024-12-30T04:13:14.123Z'
+    SetCacheRequest:
+      description: Request schema for setting cache data with key-value pairs.
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          required:
+            - key
+            - value
+            - expired
+          properties:
+            key:
+              type: string
+              maxLength: 255
+              description: Cache key
+            value:
+              type: string
+              maxLength: 4096
+              description: Cache value
+            expired:
+              type: integer
+              default: 3600
+              description: Expiration time (seconds)
+            accessLimit:
+              type: integer
+              default: 0
+              description: Access limit, 0 means no limit
+    GetCacheRequest:
+      description: Request schema for retrieving cache data by key.
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          required:
+            - key
+          properties:
+            key:
+              type: string
+              maxLength: 255
+              description: Cache key
+    DeleteCacheRequest:
+      description: Request schema for deleting cache data by key.
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          required:
+            - key
+          properties:
+            key:
+              type: string
+              maxLength: 255
+              description: Cache key
+    CreateTelGroupRequest:
+      description: >-
+        Request schema for creating a new telephone group with configuration
+        parameters.
+      allOf:
+        - $ref: '#/components/schemas/BaseRequest'
+        - type: object
+          required:
+            - tgno
+            - groupName
+            - timeout
+            - strategy
+            - enabled
+          properties:
+            tgno:
+              type: string
+              maxLength: 8
+              pattern: ^[0-9]{1,8}$
+              description: >-
+                Telephone group number (unique within tenant), numeric type,
+                maximum 8 digits
+            groupName:
+              type: string
+              description: Telephone group name
+            timeout:
+              type: integer
+              minimum: 5
+              maximum: 600
+              description: Timeout duration in seconds, range 5-600
+            strategy:
+              type: string
+              enum:
+                - order
+                - random
+              description: Call strategy, 'order' for sequential, 'random' for random
+            enabled:
+              type: integer
+              enum:
+                - 0
+                - 1
+              description: Enable status, 1 for enabled, 0 for disabled
+  responses:
+    SetCacheResponse:
+      description: Successfully set cache data with the specified key-value pair.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CacheData'
+          examples:
+            SetCacheResponseExample:
+              $ref: '#/components/examples/SetCacheResponseExample'
+    GetCacheResponse:
+      description: Successfully retrieved cache data for the specified key.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CacheData'
+          examples:
+            GetCacheResponseExample:
+              $ref: '#/components/examples/GetCacheResponseExample'
+    DeleteCacheResponse:
+      description: Successfully deleted cache data for the specified key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          examples:
+            DeleteCacheResponseExample:
+              $ref: '#/components/examples/DeleteCacheResponseExample'
+    ListCacheResponse:
+      description: Successfully retrieved the paginated list of cache keys.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CacheListData'
+          examples:
+            ListCacheResponseExample:
+              $ref: '#/components/examples/ListCacheResponseExample'
+    CreateTelGroupResponse:
+      description: Successfully created telephone group with the specified configuration.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TelGroupData'
+          examples:
+            CreateTelGroupResponseExample:
+              $ref: '#/components/examples/CreateTelGroupResponseExample'
+    BadRequestResponse:
+      description: Invalid request parameters or business logic violations.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            MissingParameter:
+              $ref: '#/components/examples/MissingParameterExample'
+            BusinessRuleViolation:
+              $ref: '#/components/examples/BusinessRuleViolationExample'
+            ResourceAlreadyExists:
+              $ref: '#/components/examples/ResourceAlreadyExistsExample'
+    UnauthorizedResponse:
+      description: Authentication failed due to invalid or missing API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InvalidApiKey:
+              $ref: '#/components/examples/InvalidApiKeyExample'
+            MissingApiKey:
+              $ref: '#/components/examples/MissingApiKeyExample'
+    ForbiddenResponse:
+      description: Access denied due to insufficient permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InsufficientPermissions:
+              $ref: '#/components/examples/InsufficientPermissionsExample'
+    NotFoundResponse:
+      description: The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ResourceNotFound:
+              $ref: '#/components/examples/ResourceNotFoundExample'
+            TenantNotFound:
+              $ref: '#/components/examples/TenantNotFoundExample'
+    RateLimitExceededResponse:
+      description: Request rate limit exceeded.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            RateLimitExceeded:
+              $ref: '#/components/examples/RateLimitExceededExample'
+    InternalServerErrorResponse:
+      description: An unexpected server error occurred.
+      headers:
+        Retry-After:
+          description: Number of seconds to wait before retrying
+          schema:
+            type: integer
+            example: 30
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            InternalError:
+              $ref: '#/components/examples/InternalErrorExample'
+    ServiceUnavailableResponse:
+      description: Service is temporarily unavailable.
+      headers:
+        Retry-After:
+          description: Number of seconds to wait before retrying
+          schema:
+            type: integer
+            example: 300
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            ServiceUnavailable:
+              $ref: '#/components/examples/ServiceUnavailableExample'
+  parameters:
+    PageNoParam:
+      name: pageNo
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number for pagination.
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 10000
+        default: 10
+      description: Number of items per page.
+    RequestIdParam:
+      name: X-CTI-Request-ID
+      in: header
+      description: Unique request identifier for tracking and deduplication.
+      required: true
+      schema:
+        type: string
+        pattern: >-
+          ^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}$
+        example: 550e8400-e29b-41d4-a716-446655440000
+    TimestampParam:
+      name: X-CTI-Timestamp
+      in: header
+      description: Request timestamp in UTC for replay protection.
+      required: true
+      schema:
+        $ref: '#/components/schemas/UTCTimestamp'
+    TenantIdParam:
+      name: X-CTI-Tenant-ID
+      in: header
+      description: Tenant context identifier for multi-tenancy validation.
+      required: true
+      schema:
+        type: string
+        pattern: ^[0-9]{7}$
+        example: '7001234'
+    NonceParam:
+      name: X-CTI-Nonce
+      in: header
+      description: Random nonce for additional replay protection.
+      required: true
+      schema:
+        type: string
+        pattern: ^[A-Za-z0-9_-]{16,32}$
+        example: A1B2C3D4E5F6G7H8
+  examples:
+    SetCacheExample:
+      summary: Set cache request example
+      description: Example request for setting cache data
+      value:
+        tenantId: 7001234
+        key: user:vip.level
+        value: vip-1
+        expired: 3600
+    GetCacheExample:
+      summary: Get cache request example
+      description: Example request for retrieving cache data
+      value:
+        tenantId: 7001234
+        key: user:vip.level
+    SetCacheResponseExample:
+      summary: Set cache response example
+      description: Example response data for successfully setting cache data
+      value:
+        result: 0
+        description: Success
+        data:
+          key: user:vip.level
+          value: vip-1
+          expired: 3600
+          createTime: '2024-12-12T09:10:11Z'
+          size: 256
+    GetCacheResponseExample:
+      summary: Get cache response example
+      description: Example response data for successfully retrieving cache data
+      value:
+        result: 0
+        description: Success
+        data:
+          key: user:vip.level
+          value: vip-1
+          expired: 3600
+          createTime: '2024-12-12T09:10:11Z'
+          size: 256
+    DeleteCacheResponseExample:
+      summary: Delete cache response example
+      description: Example response data for successfully deleting cache data
+      value:
+        result: 0
+        description: Success
+    ListCacheResponseExample:
+      summary: List cache response example
+      description: Example response data for successfully retrieving cache list
+      value:
+        result: 0
+        description: Success
+        data:
+          total: 2
+          page: 1
+          pageSize: 10
+          keys:
+            - key: user:vip.level
+              value: vip-1
+              expired: 3600
+              createTime: '2024-12-12T09:10:11Z'
+              size: 256
+            - key: session:12345
+              value: user_session_data
+              expired: 1800
+              createTime: '2024-12-30T12:13:14Z'
+              size: 512
+    CreateTelGroupExample:
+      summary: Create telephone group request example
+      description: Example request for creating a new telephone group
+      value:
+        tenantId: 7001234
+        tgno: '3000'
+        groupName: Beijing Region
+        timeout: 600
+        strategy: order
+        enabled: 1
+    CreateTelGroupResponseExample:
+      summary: Create telephone group response example
+      description: Example response data for successfully created telephone group
+      value:
+        result: 0
+        description: Success
+        data:
+          tgno: '3000'
+          groupName: Beijing Region
+          timeout: 600
+          strategy: order
+          enabled: 1
+          createTime: '2024-12-12T09:10:11Z'
+          modifyTime: '2024-12-30T12:13:14Z'
+    MissingParameterExample:
+      summary: Missing required parameter
+      description: Example of error when required parameter is missing
+      value:
+        errorCode: INVALID_REQUEST
+        message: Missing required parameter
+        details: The tenantId parameter is required for all requests
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/set
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    BusinessRuleViolationExample:
+      summary: Business logic validation failed
+      description: Example of error when business logic validation fails
+      value:
+        errorCode: INVALID_REQUEST
+        message: 'Validation failed: strategy field must be ''order'' or ''random'''
+        details: >-
+          Field 'strategy' has invalid enum value. Expected: 'order' or
+          'random', but received an invalid value.
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /tel-group/create
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    ResourceAlreadyExistsExample:
+      summary: Resource already exists
+      description: Example of error when trying to create a resource that already exists
+      value:
+        errorCode: INVALID_REQUEST
+        message: Telephone group already exists
+        details: A telephone group with tgno '3000' already exists in this tenant
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /tel-group/create
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    InvalidApiKeyExample:
+      summary: Invalid API key
+      description: Example of error when API key is invalid or expired
+      value:
+        errorCode: AUTHENTICATION_FAILED
+        message: Invalid API key provided
+        details: The API key format is invalid or the key has expired
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/set
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    MissingApiKeyExample:
+      summary: Missing API key
+      description: Example of error when API key is not provided
+      value:
+        errorCode: AUTHENTICATION_FAILED
+        message: API key is required
+        details: Authorization header with valid API key must be provided
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/get
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    InsufficientPermissionsExample:
+      summary: Insufficient permissions
+      description: Example of error when user lacks required permissions
+      value:
+        errorCode: INSUFFICIENT_PERMISSIONS
+        message: Access denied for this operation
+        details: >-
+          Current API key does not have sufficient permissions for cache
+          operations in this tenant
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/delete
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    ResourceNotFoundExample:
+      summary: Resource not found
+      description: Example of error when requested resource does not exist
+      value:
+        errorCode: RESOURCE_NOT_FOUND
+        message: Requested resource not found
+        details: No cache data found for the specified key
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/get
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    TenantNotFoundExample:
+      summary: Tenant not found
+      description: Example of error when specified tenant does not exist
+      value:
+        errorCode: RESOURCE_NOT_FOUND
+        message: Tenant not found
+        details: The specified tenant ID does not exist or is not accessible
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /tel-group/create
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    RateLimitExceededExample:
+      summary: Rate limit exceeded
+      description: Example of error when request rate limit is exceeded
+      value:
+        errorCode: RATE_LIMIT_EXCEEDED
+        message: Too many requests
+        details: Rate limit exceeded, please retry after 60 seconds
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/set
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    InternalErrorExample:
+      summary: Internal server error
+      description: Example of error when unexpected server error occurs
+      value:
+        errorCode: INTERNAL_ERROR
+        message: An unexpected error occurred
+        details: Please contact support if the problem persists
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/set
+        requestId: 550e8400-e29b-41d4-a716-446655440000
+    ServiceUnavailableExample:
+      summary: Service unavailable
+      description: Example of error when service is temporarily unavailable
+      value:
+        errorCode: INTERNAL_ERROR
+        message: Service temporarily unavailable
+        details: >-
+          The cache service is currently undergoing maintenance, please retry in
+          a few minutes
+        timestamp: '2024-12-30T04:13:14Z'
+        path: /cache/list
+        requestId: 550e8400-e29b-41d4-a716-446655440000
