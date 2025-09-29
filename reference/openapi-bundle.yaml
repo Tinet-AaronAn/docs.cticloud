@@ -307,78 +307,6 @@ components:
       type: apiKey
       in: header
       name: X-CTI-ApiKey
-      description: >
-        CTICloud API Key authentication for secure access to platform resources.
-
-
-        **How it works:**
-
-        Clients include a pre-shared API key in the request header for
-        authentication.
-
-        The server validates the key against authorized credentials and grants
-        access accordingly.
-
-
-        **Header Format:**
-
-        ```
-
-        X-CTI-ApiKey: {ApiKey}
-
-        ```
-
-
-        **Security Features:**
-
-        - **Strong Key Generation**: API keys use cryptographically secure
-        random generation
-
-        - **Key Rotation**: Regular key rotation policies enforced
-
-        - **Access Scoping**: Keys can be scoped to specific operations and
-        resources
-
-        - **Rate Limiting**: Per-key request rate limiting prevents abuse
-
-        - **Audit Logging**: All API key usage is logged for security monitoring
-
-
-        **Required Security Headers:**
-
-        - `X-CTI-Request-ID`: Unique request identifier for tracking and
-        deduplication
-
-        - `X-CTI-Timestamp`: Request timestamp for replay protection (UTC
-        format)
-
-        - `X-CTI-Tenant-ID`: Tenant context identifier for multi-tenancy
-        validation
-
-        - `X-CTI-Nonce`: Random nonce for additional replay protection
-
-
-        **Key Format:**
-
-        - API Keys: Simple secure random string with prefix (e.g.,
-        CTIK_ABC123XYZ789DEF456GHI)
-
-        - Length: 32-64 characters for sufficient entropy  
-
-        - Character set: Base64URL safe characters (A-Z, a-z, 0-9, -, _)
-
-        - Tenant context provided via X-CTI-Tenant-ID header
-
-
-        **Security Requirements:**
-
-        - All requests must use HTTPS/TLS 1.2+ encryption
-
-        - Keys must be stored securely and never logged or exposed
-
-        - Implement proper key lifecycle management
-
-        - Monitor for suspicious usage patterns
   schemas:
     BaseRequest:
       description: >-
@@ -1103,3 +1031,4 @@ components:
         timestamp: '2024-12-30T04:13:14Z'
         path: /cache/list
         requestId: 550e8400-e29b-41d4-a716-446655440000
+x-readme: {}
